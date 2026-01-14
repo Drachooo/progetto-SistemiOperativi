@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(SHA256 VERSION 1.0)
+project(SHA256 VERSION 1.0 LANGUAGES C)
 
 set(CMAKE_MACOSX_RPATH 1)
 set(BUILD_SHARED_LIBS ON)
