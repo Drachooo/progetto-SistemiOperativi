@@ -7,10 +7,10 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "../include/shared.h"
-#include "../include/sha256_utils.h" // Per hash_to_string
+#include "../include/sha256_utils.h" 
+// Per hash_to_string
 
 
-//ascolta continuamente e 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         printf("Uso: %s <percorso_file>\n", argv[0]);
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    // 3. Invia la richiesta al Server (FIFO Pubblica)
+    //Invio la richiesta al Server (FIFO Pubblica)
     int server_fd = open(SERVER_FIFO, O_WRONLY);
     if (server_fd == -1) {
         perror("Errore apertura server FIFO (Il server è avviato?)");
@@ -43,21 +43,19 @@ int main(int argc, char *argv[]) {
     write(server_fd, &req, sizeof(request_t));
     close(server_fd);
 
-    // 4. Attende la risposta (apre la propria FIFO in lettura)
-    // Il programma si blocca qui finché il thread del server non apre la FIFO in scrittura
+    //Attendo la risposta (apre la propria FIFO in lettura)
     int client_fd = open(client_fifo_path, O_RDONLY);
     uint8_t hash[SHA256_DIGEST_LENGTH];
     
     if (read(client_fd, hash, SHA256_DIGEST_LENGTH) > 0) {
         char hash_string[65];
         hash_to_string(hash, hash_string);
-        printf("%s\n", hash_string); // Stampa solo l'hash come richiesto
+        printf("%s\n", hash_string);
     } else {
         printf("Errore nella ricezione della risposta\n");
     }
 
-    // 5. Pulizia
     close(client_fd);
-    unlink(client_fifo_path); // Cancella la FIFO dal disco
+    unlink(client_fifo_path);
     return 0;
 }
