@@ -6,24 +6,30 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
-#include "../include/shared.h"
-#include "../include/sha256_utils.h" 
-// Per hash_to_string
-
+#include "shared.h"
+#include "sha256_utils.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        printf("Uso: %s <percorso_file>\n", argv[0]);
+        printf("Uso: %s <percorso_file> oppure %s -q (per interrogare la cache)\n", argv[0], argv[0]);
         exit(1);
     }
 
-    //Prepara la richiesta
     request_t req;
     req.client_pid = getpid();
-    strncpy(req.file_path, argv[1], MAX_PATH - 1);
-    req.file_path[MAX_PATH - 1] = '\0';
 
-    //Crea la FIFO Privata per la risposta (/tmp/client_PID_fifo)
+    //Gestione flag 
+    if (strcmp(argv[1], "-q") == 0 || strcmp(argv[1], "--query") == 0) {
+        req.type = REQ_QUERY;
+        strcpy(req.file_path, "");
+        printf("[CLIENT] Invio richiesta interrogazione cache...\n");
+    } else {
+        req.type = REQ_CALC;
+        strncpy(req.file_path, argv[1], MAX_PATH - 1);
+        req.file_path[MAX_PATH - 1] = '\0';
+    }
+
+    // Creazione FIFO privata
     char client_fifo_path[256];
     sprintf(client_fifo_path, "/tmp/client_%d_fifo", req.client_pid);
 
@@ -32,27 +38,43 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    //Invio la richiesta al Server (FIFO Pubblica)
+    //Invio richiesta
     int server_fd = open(SERVER_FIFO, O_WRONLY);
     if (server_fd == -1) {
-        perror("Errore apertura server FIFO (Il server è avviato?)");
+        perror("Errore apertura server FIFO");
         unlink(client_fifo_path);
         exit(1);
     }
-    
     write(server_fd, &req, sizeof(request_t));
     close(server_fd);
 
-    //Attendo la risposta (apre la propria FIFO in lettura)
+    //Acquisizione Risposta
     int client_fd = open(client_fifo_path, O_RDONLY);
-    uint8_t hash[SHA256_DIGEST_LENGTH];
-    
-    if (read(client_fd, hash, SHA256_DIGEST_LENGTH) > 0) {
-        char hash_string[65];
-        hash_to_string(hash, hash_string);
-        printf("%s\n", hash_string);
+    if (client_fd == -1) {
+        perror("Errore apertura FIFO client lettura");
+        unlink(client_fifo_path);
+        exit(1);
+    }
+
+    if (req.type == REQ_CALC) {
+        //caso base: vengono letti 32 byte di hash
+        uint8_t hash[SHA256_DIGEST_LENGTH];
+        if (read(client_fd, hash, SHA256_DIGEST_LENGTH) > 0) {
+            char hash_string[65];
+            hash_to_string(hash, hash_string);
+            printf("%s\n", hash_string);
+        }
     } else {
-        printf("Errore nella ricezione della risposta\n");
+        //caso coda: lista 
+        char buffer[4096]; //Buffer per testo
+        ssize_t n;
+        printf("--- CONTENUTO CACHE SERVER ---\n");
+        //Rimane in lettura finché il server non chiude la connessione (EOF)
+        while ((n = read(client_fd, buffer, sizeof(buffer) - 1)) > 0) {
+            buffer[n] = '\0';
+            printf("%s", buffer);
+        }
+        printf("------------------------------\n");
     }
 
     close(client_fd);
