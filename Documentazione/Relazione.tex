@@ -1,0 +1,128 @@
+\documentclass[12pt, a4paper, oneside]{book}
+
+% --- LINGUA E CODIFICA ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\renewcommand{\familydefault}{\sfdefault} % Sans-serif moderno
+
+% --- MARGINI E GEOMETRIA ---
+\usepackage[a4paper, margin=2.5cm]{geometry}
+
+% --- COLORI E LINK ---
+\usepackage{xcolor}
+\definecolor{azzurrino}{HTML}{1E88E5}
+\definecolor{grigiochiaro}{HTML}{F5F5F5}
+\definecolor{grigioscuro}{HTML}{424242}
+
+\usepackage[
+    colorlinks=true,
+    linkcolor=grigioscuro,
+    citecolor=azzurrino,
+    urlcolor=azzurrino
+]{hyperref}
+
+% --- TITOLI MODERNI ---
+\usepackage{titlesec}
+
+\titleformat{\chapter}[display]
+  {\normalfont\Huge\bfseries\color{azzurrino}}
+  {\filleft\Huge\thechapter}
+  {0pt}
+  {\titlerule[1pt]\vspace{1ex}\filright}
+  [\vspace{1ex}\titlerule]
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{azzurrino}}{\thesection}{1em}{}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{grigioscuro}}{\thesubsection}{1em}{}
+
+\setcounter{tocdepth}{4}
+\setcounter{secnumdepth}{4}
+
+\titleformat{\subsubsection}
+  {\normalfont\large\bfseries\color{grigioscuro}}{\thesubsubsection}{1em}{}
+
+% --- CAPTION COLORATE ---
+\usepackage[font=small, labelfont={bf, color=azzurrino}]{caption}
+
+% --- HEADER E FOOTER ---
+\usepackage{fancyhdr}
+\setlength{\headheight}{25pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\color{grigioscuro}\leftmark}
+\fancyhead[R]{\color{azzurrino}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{azzurrino}\leaders\hrule height \headrulewidth\hfill}}
+\fancyfoot[C]{\color{grigioscuro}\small Fondamenti dell'informatica – \thepage}
+
+% --- LISTE ED ENUMERAZIONI ---
+\usepackage{enumitem}
+\setlist{nosep, leftmargin=1.5em}
+
+% --- GRAFICA E FIGURE ---
+\usepackage{graphicx}
+\usepackage{bookmark}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage[normalem]{ulem} % sottolineature
+\usepackage{subcaption}
+\usepackage{soul} % evidenziazione
+\usepackage{parskip} % spaziatura tra paragrafi
+
+% --- Tcolorbox e Listings ---
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{listings, skins, breakable, theorems} % theorems utile per ambienti come erexercise
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% --- Tabelle ---
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+
+% --- FRONTESPIZIO ---
+\title{\Huge\bfseries Appunti del corso di \\[0.5ex]
+\textcolor{azzurrino}{Fondamenti dell'informatica} \\[1ex]
+\Large UniVR - Dipartimento di Informatica \\[1.5ex]
+\Large Primo semestre - A.A. 2025/26}
+\author{\Large Mattia \and Matteo Drago}
+\date{}
+
+\input{../../../ambienti.sty} %file apposito per definire nuovi comandi
+
+% =================================
+\begin{document}
+    \frontmatter
+    \maketitle
+    \tableofcontents
+    \thispagestyle{empty}
+    \newpage
+
+    %===========================
+    \mainmatter
+
+    % --- CAPITOLO 1: NOZIONI DI BASE DEL CORSO ---
+    \chapter{Concetti di base}
+
+    \section{Nozioni di logica}
+    La logica permette di avere un linguaggio (anche formale) utilizzato per descrivere i vari elementi.
+
+    Il \textbf{linguaggio del primo ordine} è un linguaggio che è formato da un certo insieme di simboli:
+    \begin{itemize}
+      \item \textit{relazionali}: $p, q, r, \dots$
+      \item \textit{funzionali}: $f, g, h, \dots$
+      \item \textit{costanti}: $c, d, \dots$
+      \item \textit{logici}: insieme di simboli
+      \begin{itemize}
+        \item parentesi tonde ( ) e virgola ,
+        \item insieme numerabile ($\mathbb{N}$) di variabili ($v, x, y, \dots$) 
+        \item insieme di connettivi logici ($\land, \lor, \Rightarrow, \Leftrightarrow$)
+        \item quantificatori ($\forall, \exists$)
+      \end{itemize}
+    \end{itemize}
+
+    
+\end{document}
