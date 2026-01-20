@@ -1,0 +1,5 @@
+/home/drachoo/progettoSistemiOperativi/project/build/CMakeFiles/sha256_utils.dir
+/home/drachoo/progettoSistemiOperativi/project/build/CMakeFiles/server.dir
+/home/drachoo/progettoSistemiOperativi/project/build/CMakeFiles/client.dir
+/home/drachoo/progettoSistemiOperativi/project/build/CMakeFiles/edit_cache.dir
+/home/drachoo/progettoSistemiOperativi/project/build/CMakeFiles/rebuild_cache.dir
