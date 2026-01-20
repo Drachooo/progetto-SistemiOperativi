@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/server.dir/src/server.c.o -o server  libsha256_utils.a /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libcrypto.so 
