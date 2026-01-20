@@ -90,12 +90,12 @@ Il progetto ha come obiettivo lo sviluppo di un servizio client-server per il ca
 \section{Specifiche implementate}
 Le specifiche implementate sono state: 
 \begin{itemize}
-  \item \textbf{Comunicazione IPC tramite FIFO}: è stato implementato un canale di comunicazione bidirezionale tra il Client e il server utilizzando Named Pipes (FIFO). Il protocollo permette l'invio del percorso del file dal Client al Server e la ricezione dell'impronta calcolata.
-  \item \textbf{Gestione della concorrenza}: il server è stato progettato per istanziare thread distinti per ogni richiesta che viene ricevuta, permettendo l'elaborazione di più file in modo parallelo.
+  \item \textbf{Comunicazione IPC tramite FIFO}: è stato implementato un canale di comunicazione bidirezionale tra il Client e il Server utilizzando Named Pipes (FIFO). Il protocollo permette l'invio del percorso del file dal Client al Server e la ricezione dell'impronta calcolata.
+  \item \textbf{Gestione della concorrenza}: il Server è stato progettato per istanziare thread distinti per ogni richiesta che viene ricevuta, permettendo l'elaborazione di più file in modo parallelo.
   \item \textbf{Limitazione dei Thread (Thread pool)}: è stato introdotto un limite massimo al numero di thread in esecuzione simultanea per evitare il sovraccarico del sistema (un massimo di 6 thread).
   \item \textbf{Schedulazione delle richieste}: le richieste in attesa vengono riordinate in base al criterio \textit{Shortest Job First} (SJF), questo per privilegiare i file più piccoli e ridurre il tempo medio di attesa.
   \item \textbf{Caching in memoria e richieste identiche simultanee}: è stata implementata una Linked List per memorizzare le coppie \textit{<persorso, hash>}  . In caso di richiesta ripetuta per uno stesso file il server restituisce il valore in cache andando ad evitare calcoli inutili. Nel caso arrivassero più richieste per lo stesso file contemporaneamente, il calcolo viene fatto una sola volta, andando a restituire il risultato dell'unica computazione fatta.
-  \item \textbf{Cache}: è possibile interrogare il server per conoscere le richieste già processate
+  \item \textbf{Cache}: è possibile interrogare il server per conoscere le richieste già processate.
 \end{itemize}
 
 \section{Architettura del progetto}
@@ -104,7 +104,7 @@ Il server adotta il pattern Producer - Consumer gestito tramite un Thread pool.
 
 \subsection{Struttura}
 \begin{description}
-  \item[Main Thread (producer)]: Ascolta sulla FIFO pubblica, gestisce le \texttt{REQ\_QUERY} e le \texttt{REQ\_CALC}. Le prime vengono gestite immediatamente (interrogazione alla cache). Per le secondo viene prima verificata la presenza in cache, se il file non è presente viene inserito un nuovo task nella coda condivisa e viene attivato un worker.
+  \item[Main Thread (producer)]: Ascolta sulla FIFO pubblica, gestisce le \texttt{REQ\_QUERY} e le \texttt{REQ\_CALC}. Le prime vengono gestite immediatamente (interrogazione alla cache). Per le seconde viene prima verificata la presenza in cache, se il file non è presente viene inserito un nuovo task nella coda condivisa e viene attivato un worker.
   \item[Worker Threads (consumers)]: All'avvio viene creato un numero fissato di thread (\texttt{NUM\_THREADS = 6}). I thread rimangono in attesa finchè non c'è lavoro andando ad eliminare il consumo di CPU a vuoto. Successivamente ogni worker preleva un task, legge il file dal disco, calcola l'hash SHA-256 e aggiorna la cache.
 \end{description}
 
@@ -165,7 +165,7 @@ Nonostante la richiesta del file medio fosse arrivata prima di quello piccolo, i
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{images/schedulingAccodamento.png}
-    \caption{Schema logico del meccanismo di accodamento e schedulazione (Shortest Job First).}
+    \caption{meccanismo di accodamento e schedulazione.}
 \end{figure}
 
 \subsection{Verifica del caching (Cache Hit)}
@@ -174,7 +174,7 @@ Nonostante la richiesta del file medio fosse arrivata prima di quello piccolo, i
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{images/time.png}
-    \caption{Schema logico del meccanismo di accodamento e schedulazione (Shortest Job First).}
+    \caption{caching in memoria.}
 \end{figure}
 
 \subsection{Verifica del Coalescing (richieste simultanee)}
@@ -183,7 +183,7 @@ Per validare il requisito di gestione di richieste multiple simultanee sono stat
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{images/worker.png}
-    \caption{Schema logico del meccanismo di accodamento e schedulazione (Shortest Job First).}
+    \caption{gestione coalescing.}
 \end{figure}
 
 \subsection{Verifica della Query}
@@ -192,14 +192,15 @@ Per validare il requisito di gestione di richieste multiple simultanee sono stat
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{images/query.png}
-    \caption{Schema logico del meccanismo di accodamento e schedulazione (Shortest Job First).}
+    \caption{interrogazione al server.}
 \end{figure}
 
 \section{Difficoltà affrontate}
 \subsection{Gestione canale di risposta}
-A differenza della richiesta, la risposta viaggia su un canale dedicate per evitare \textit{race conditions} in lettura tra client diversi. é stato necessario sincronizzare l'apertura della FIFO privata lato server (che deve avvenire solo dopo che il client l'ha creata) e gestire correttamente la scrittura bloccante, assicurando che ogni PID ricevesse esclusivamente il proprio hash calcolato.
+A differenza della richiesta, la risposta viaggia su un canale dedicato per evitare \textit{race conditions} in lettura tra client diversi. È stato necessario sincronizzare l'apertura della FIFO privata lato server (che deve avvenire solo dopo che il client l'ha creata) e gestire correttamente la scrittura bloccante, assicurando che ogni PID ricevesse esclusivamente il proprio hash calcolato.
 
-\subsection{Cache querying}
+\subsection{Sincronizzazione delle richieste duplicate}
+L'architettura del sistema gestisce le richieste duplicate accodando i PID in una lista dinamica protetta da Mutex. La difficoltà principale è stata quella di garantire l'integrità di tale struttura condivisa tra il Main Thread (che accoda le richieste) e i Worker Threads (che la evadono), organizzando lo sblocco dei client tramite IPC in modo perfettamente sincrono con la disponibilità finale dell'hash in cache.
 
 
 

@@ -19,4 +19,4 @@
 \contentsline {subsection}{\numberline {5.4}Verifica della Query}{5}{subsection.0.5.4}%
 \contentsline {section}{\numberline {6}Difficoltà affrontate}{5}{section.0.6}%
 \contentsline {subsection}{\numberline {6.1}Gestione canale di risposta}{5}{subsection.0.6.1}%
-\contentsline {subsection}{\numberline {6.2}Cache querying}{5}{subsection.0.6.2}%
+\contentsline {subsection}{\numberline {6.2}Sincronizzazione delle richieste duplicate}{5}{subsection.0.6.2}%
