@@ -4,125 +4,203 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[italian]{babel}
-\renewcommand{\familydefault}{\sfdefault} % Sans-serif moderno
 
-% --- MARGINI E GEOMETRIA ---
+% --- MARGINI ---
 \usepackage[a4paper, margin=2.5cm]{geometry}
 
 % --- COLORI E LINK ---
 \usepackage{xcolor}
 \definecolor{azzurrino}{HTML}{1E88E5}
-\definecolor{grigiochiaro}{HTML}{F5F5F5}
 \definecolor{grigioscuro}{HTML}{424242}
 
 \usepackage[
-    colorlinks=true,
-    linkcolor=grigioscuro,
-    citecolor=azzurrino,
-    urlcolor=azzurrino
+  colorlinks=true,
+  linkcolor=grigioscuro,
+  citecolor=black,
+  urlcolor=azzurrino
 ]{hyperref}
 
-% --- TITOLI MODERNI ---
-\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{float}
 
+% --- TITOLI ---
+\usepackage{titlesec}
+\renewcommand{\thesection}{\arabic{section}}
+
+% Capitoli numerati
 \titleformat{\chapter}[display]
-  {\normalfont\Huge\bfseries\color{azzurrino}}
+  {\normalfont\Huge\bfseries}
   {\filleft\Huge\thechapter}
   {0pt}
   {\titlerule[1pt]\vspace{1ex}\filright}
   [\vspace{1ex}\titlerule]
 
+% Capitoli non numerati (Indice, Bibliografia)
+\titleformat{name=\chapter,numberless}[display]
+  {\normalfont\Huge\bfseries}
+  {}
+  {0pt}
+  {\titlerule[1pt]\vspace{1ex}\filright} % barra sopra
+  [\vspace{1ex}\titlerule]               % barra sotto
+
 \titleformat{\section}
-  {\normalfont\Large\bfseries\color{azzurrino}}{\thesection}{1em}{}
+  {\normalfont\Large\bfseries}{\thesection}{1em}{}
 
 \titleformat{\subsection}
   {\normalfont\large\bfseries\color{grigioscuro}}{\thesubsection}{1em}{}
 
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{grigioscuro}}{\thesubsubsection}{1em}{}
+
+% --- INDICE ---
+\usepackage{tocloft}
+\renewcommand{\cftsecfont}{\bfseries}
+\renewcommand{\cftsecpagefont}{\bfseries}
 \setcounter{tocdepth}{4}
 \setcounter{secnumdepth}{4}
-
-\titleformat{\subsubsection}
-  {\normalfont\large\bfseries\color{grigioscuro}}{\thesubsubsection}{1em}{}
-
-% --- CAPTION COLORATE ---
-\usepackage[font=small, labelfont={bf, color=azzurrino}]{caption}
 
 % --- HEADER E FOOTER ---
 \usepackage{fancyhdr}
 \setlength{\headheight}{25pt}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\color{grigioscuro}\leftmark}
-\fancyhead[R]{\color{azzurrino}\thepage}
-\renewcommand{\headrulewidth}{0.4pt}
-\renewcommand{\headrule}{\hbox to\headwidth{\color{azzurrino}\leaders\hrule height \headrulewidth\hfill}}
-\fancyfoot[C]{\color{grigioscuro}\small Fondamenti dell'informatica – \thepage}
-
-% --- LISTE ED ENUMERAZIONI ---
-\usepackage{enumitem}
-\setlist{nosep, leftmargin=1.5em}
-
-% --- GRAFICA E FIGURE ---
-\usepackage{graphicx}
-\usepackage{bookmark}
-\usepackage{float}
-\usepackage{wrapfig}
-\usepackage[normalem]{ulem} % sottolineature
-\usepackage{subcaption}
-\usepackage{soul} % evidenziazione
-\usepackage{parskip} % spaziatura tra paragrafi
-
-% --- Tcolorbox e Listings ---
-\usepackage[most]{tcolorbox}
-\tcbuselibrary{listings, skins, breakable, theorems} % theorems utile per ambienti come erexercise
-\usepackage{amsmath}
-\usepackage{amssymb}
-
-% --- Tabelle ---
-\usepackage{longtable}
-\usepackage{array}
-\usepackage{tabularx}
+\fancyhead[L]{\leftmark}
+\fancyfoot[C]{\small Sistemi Operativi -- \thepage}
 
 % --- FRONTESPIZIO ---
-\title{\Huge\bfseries Appunti del corso di \\[0.5ex]
-\textcolor{azzurrino}{Fondamenti dell'informatica} \\[1ex]
-\Large UniVR - Dipartimento di Informatica \\[1.5ex]
-\Large Primo semestre - A.A. 2025/26}
-\author{\Large Mattia \and Matteo Drago}
-\date{}
-
-\input{../../../ambienti.sty} %file apposito per definire nuovi comandi
+\title{\Huge \textbf{Progetto di Sistemi Operativi} \\[0.5ex]
+{Opzione 2: Pthread e FIFO} \\[1ex]}
+\author{\Large Matteo Drago \\ Matricola: VR500241}
+\date{\Large Anno Accademico 2025/2026}
 
 % =================================
 \begin{document}
-    \frontmatter
-    \maketitle
-    \tableofcontents
-    \thispagestyle{empty}
-    \newpage
+\frontmatter 
+\maketitle
+\tableofcontents       % genera l'indice
+\thispagestyle{empty}  % rimuove header/footer dalla pagina dell'indice
+\clearpage              % forza nuova pagina
+\markboth{}{}           % resetta i "marks" per header
 
-    %===========================
-    \mainmatter
+\mainmatter
 
-    % --- CAPITOLO 1: NOZIONI DI BASE DEL CORSO ---
-    \chapter{Concetti di base}
+\section{Introduzione}
+Il progetto ha come obiettivo lo sviluppo di un servizio client-server per il calcolo concorrente di impronte digitali SHA-256 di più file. Il sistema è composto da un server, capace di gestire richieste multiple simultaneamente, e da un client che interroga il servizio.
 
-    \section{Nozioni di logica}
-    La logica permette di avere un linguaggio (anche formale) utilizzato per descrivere i vari elementi.
+\section{Specifiche implementate}
+Le specifiche implementate sono state: 
+\begin{itemize}
+  \item \textbf{Comunicazione IPC tramite FIFO}: è stato implementato un canale di comunicazione bidirezionale tra il Client e il server utilizzando Named Pipes (FIFO). Il protocollo permette l'invio del percorso del file dal Client al Server e la ricezione dell'impronta calcolata.
+  \item \textbf{Gestione della concorrenza}: il server è stato progettato per istanziare thread distinti per ogni richiesta che viene ricevuta, permettendo l'elaborazione di più file in modo parallelo.
+  \item \textbf{Limitazione dei Thread (Thread pool)}: è stato introdotto un limite massimo al numero di thread in esecuzione simultanea per evitare il sovraccarico del sistema (un massimo di 6 thread).
+  \item \textbf{Schedulazione delle richieste}: le richieste in attesa vengono riordinate in base al criterio \textit{Shortest Job First} (SJF), questo per privilegiare i file più piccoli e ridurre il tempo medio di attesa.
+  \item \textbf{Caching in memoria e richieste identiche simultanee}: è stata implementata una Linked List per memorizzare le coppie \textit{<persorso, hash>}  . In caso di richiesta ripetuta per uno stesso file il server restituisce il valore in cache andando ad evitare calcoli inutili. Nel caso arrivassero più richieste per lo stesso file contemporaneamente, il calcolo viene fatto una sola volta, andando a restituire il risultato dell'unica computazione fatta.
+  \item \textbf{Cache}: è possibile interrogare il server per conoscere le richieste già processate
+\end{itemize}
 
-    Il \textbf{linguaggio del primo ordine} è un linguaggio che è formato da un certo insieme di simboli:
-    \begin{itemize}
-      \item \textit{relazionali}: $p, q, r, \dots$
-      \item \textit{funzionali}: $f, g, h, \dots$
-      \item \textit{costanti}: $c, d, \dots$
-      \item \textit{logici}: insieme di simboli
-      \begin{itemize}
-        \item parentesi tonde ( ) e virgola ,
-        \item insieme numerabile ($\mathbb{N}$) di variabili ($v, x, y, \dots$) 
-        \item insieme di connettivi logici ($\land, \lor, \Rightarrow, \Leftrightarrow$)
-        \item quantificatori ($\forall, \exists$)
-      \end{itemize}
-    \end{itemize}
+\section{Architettura del progetto}
+L'architettura è stata progettata per massimizzare il \textit{throughput}, minimizzare la latenza per i file di piccole dimensioni e ottimizzare l'uso delle risorse tramite caching e coaleshing delle richieste.
+Il server adotta il pattern Producer - Consumer gestito tramite un Thread pool.
 
-    
+\subsection{Struttura}
+\begin{description}
+  \item[Main Thread (producer)]: Ascolta sulla FIFO pubblica, gestisce le \texttt{REQ\_QUERY} e le \texttt{REQ\_CALC}. Le prime vengono gestite immediatamente (interrogazione alla cache). Per le secondo viene prima verificata la presenza in cache, se il file non è presente viene inserito un nuovo task nella coda condivisa e viene attivato un worker.
+  \item[Worker Threads (consumers)]: All'avvio viene creato un numero fissato di thread (\texttt{NUM\_THREADS = 6}). I thread rimangono in attesa finchè non c'è lavoro andando ad eliminare il consumo di CPU a vuoto. Successivamente ogni worker preleva un task, legge il file dal disco, calcola l'hash SHA-256 e aggiorna la cache.
+\end{description}
+
+\subsection{Protocollo di comunicazione}
+Il protocollo segue uno schema richiesta-risposta sincrono:
+\begin{enumerate}
+  \item \textbf{Setup}: il Client crea la propria FIFO privata usando il proprio PID come identificatore univoco
+  \item \textbf{Request}: il Client apre la FIFO pubblica in scrittura (\texttt{O\_WRONLY}) e invia un binario strutturato (\texttt{request\_t}) contenente:
+  \begin{itemize}
+    \item il PID del mittente (per la risposta)
+    \item il tipo di richiesta (Hash o Query Cache)
+    \item il percorso del file. Successivamente la FIFO pubblica viene chiusa.
+  \end{itemize}
+  \item \textbf{Wait}: il Client apre la propria FIFO privata in lettura (\texttt{O\_RDONLY}). Le pipe sono bloccanti e il Client entra in un ``blocked state'' finchè il Server non scrive qualcosa.
+  \item \textbf{Processing}: il Server riceve la richiesta, la elabora (con Cache o Worker) e apre la FIFO privata del Client specifico.
+  \item \textbf{Response}: Il server scrive il risultato nella FIFO privata e chiude la connessione.
+  \item \textbf{Teardown}: il client si sveglia, legge i dati, chiude la FIFO privata e la cancella dal filesystem.
+\end{enumerate}
+
+\section{Dettagli implementativi}
+
+
+\subsection{Granularità del Locking}
+Non è stato utilizzato un unico mutex globale, bensì sono stati utilizzati:
+\begin{itemize}
+  \item \texttt{queue\_mutex}: protegge solo l'inserimento o il prelievo dei task
+  \item \texttt{cache\_mutex}: protegge la lettura o scrittura dei risultati
+\end{itemize}
+Questo è fondamentale in quanto permette al Main Thread di accettare e accodare nuove richieste nello stesso istante in cui un Worker sta scrivendo un risultato in cache permettendo di aumentare il parallelismo.
+
+\subsection{Prevenzione dei DeadLock}
+L'architettura evita i DeadLock strutturalmente imponendo un ordine di acquisizione rigoroso (Lock Ordering). Non si verifica mai la condizione in cui un thread possiede il secondo mutex e attende il primo, rendendo impossibile l'attesa circolare tra il Main e il Worker.
+
+\subsection{Gestione delle risorse}
+\subsubsection{Tempo di calcolo}
+Per prevenire il fenomeno del thrashing è stato fissato un numero massimo di thread concorrenti(\texttt{NUM\_THREADS 6}). In questo modo anzichè creare un numero inifnito di thread, che causerebbe un eccessivo context switching, il sistema accoda le richieste in eccesso. L'uso poi dell'algoritmo \textbf{SJF} porta alla gestione della coda, privilegiando i file più piccoli per ridurre il tempo medio di risposta.
+
+\subsubsection{Throughput}
+Per evitare un accesso lento alle risorse, prima vi avviare una lettura il server controlla se il file è già in fase di elaborazione, se cosi fosse non viene avviato un nuovo thread, bensì il client viene agganciato al worker esistente. Questo permette di trasformare la velocitità di elaborazione da \textit{O(N)} a \textit{O(1)}.
+
+\subsubsection{Uso della memoria e sincronizzazione}
+Per la memorizzazione dei risultati (\textbf{caching}) è stata utilizzata una lista concatenata che memorizza i path e gli hash calcolati precedentemente permettendo di non dover spendere CPU e I/O per i file già processati. 
+
+L'accesso alla coda dei task e alla lista della cache è regolata tramite Mutex (\texttt{pthread\_mutex\_t}), che garantiscono mutua esclusione prevenendo la \textit{race conditions}.
+
+
+\section{Verifica e Test}
+La verifica del sistema è stata fatta manualemente testando diversi casi limite.
+
+\subsection{Verifica capacità limite e scheduling SJF}
+Per verificare l'algoritmo \textbf{SJF} e la gestione delle priorità sono state inviate 6 richieste simultanee per file di grandi dimensioni (circa 130 MB). Queste richieste hanno occupato istantaneamente tutti i worker disponibili. Sono poi state inviate 2 ulteriori richieste:
+\begin{itemize}
+  \item un file medio (110 MB)
+  \item un file piccolo (101 MB)
+\end{itemize} 
+Nonostante la richiesta del file medio fosse arrivata prima di quello piccolo, i log hanno mostrato che non appena un thread si è liberato, il sistema ha eseguito il file piccolo
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{images/schedulingAccodamento.png}
+    \caption{Schema logico del meccanismo di accodamento e schedulazione (Shortest Job First).}
+\end{figure}
+
+\subsection{Verifica del caching (Cache Hit)}
+È stata verificata l'efficacia del caching in memoria rieseguendo una richiesta per un file di grandi dimensioni già elaborato. Il tempo di risposta è stato misurato tramite l'utility time ed è passato da circa 2-3 secondi per la prima esecuzione a pochi millisecondi per la seconda.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{images/time.png}
+    \caption{Schema logico del meccanismo di accodamento e schedulazione (Shortest Job First).}
+\end{figure}
+
+\subsection{Verifica del Coalescing (richieste simultanee)}
+Per validare il requisito di gestione di richieste multiple simultanee sono stati lanciati due client concorrenti che richiedevano lo stesso file non ancora presente in cache. Il server ha istanziato un singolo task di calcolo (un solo worker era attivo), mettendo il secondo client in attesa e servendo entrambi al termina dell'unica operazione I/O.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{images/worker.png}
+    \caption{Schema logico del meccanismo di accodamento e schedulazione (Shortest Job First).}
+\end{figure}
+
+\subsection{Verifica della Query}
+È stato infine implementato  il flag \texttt{-q} che permette di interrogare lo stato del server mostrando i file memorizzati nella cache e i relativi hash calcolati.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{images/query.png}
+    \caption{Schema logico del meccanismo di accodamento e schedulazione (Shortest Job First).}
+\end{figure}
+
+\section{Difficoltà affrontate}
+\subsection{Gestione canale di risposta}
+A differenza della richiesta, la risposta viaggia su un canale dedicate per evitare \textit{race conditions} in lettura tra client diversi. é stato necessario sincronizzare l'apertura della FIFO privata lato server (che deve avvenire solo dopo che il client l'ha creata) e gestire correttamente la scrittura bloccante, assicurando che ogni PID ricevesse esclusivamente il proprio hash calcolato.
+
+\subsection{Cache querying}
+
+
+
 \end{document}
